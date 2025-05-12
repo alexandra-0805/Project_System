@@ -1,0 +1,418 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import javax.swing.table.DefaultTableModel;
+
+public class dashboard extends javax.swing.JFrame {
+    private Connection connection;
+    private PreparedStatement pst;
+    private ResultSet rs;
+    
+    public dashboard() {
+        initComponents();
+        this.setLocationRelativeTo(null); 
+        connectToDatabase(); // Connect to database when form loads
+        loadProductData();   // Load initial product data
+    }
+    // Method to connect to MySQL database
+    private void connectToDatabase() {
+        try {
+            String url = "jdbc:mysql://localhost:3306/convenience";
+            String username = "root";
+            String password = "";
+            
+            connection = DriverManager.getConnection(url, username, password);
+            System.out.println("Connected to database successfully!");
+            createProductsTable();
+            initializeProductData();
+        } catch (SQLException e) {
+            System.err.println("Error connecting to database: " + e.getMessage());
+        }
+    }
+    
+    private void createProductsTable() {
+    try {
+        String createTableSQL = "CREATE TABLE IF NOT EXISTS products (" +
+                               "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                               "name VARCHAR(100) NOT NULL, " +
+                               "category VARCHAR(100), " +
+                               "price DECIMAL(10,2), " +
+                               "stock INT)";
+        
+        pst = connection.prepareStatement(createTableSQL);
+        pst.executeUpdate();
+        System.out.println("Products table created or already exists");
+    } catch (SQLException e) {
+        System.err.println("Error creating products table: " + e.getMessage());
+    } finally {
+        try {
+            if (pst != null) pst.close();
+        } catch (SQLException e) {
+            System.err.println("Error closing statement: " + e.getMessage());
+        }
+    }
+}
+    
+    private void initializeProductData() {
+    try {
+        // Check if products table is empty
+        pst = connection.prepareStatement("SELECT COUNT(*) FROM products");
+        rs = pst.executeQuery();
+        rs.next();
+        int count = rs.getInt(1);
+        
+        if (count == 0) {
+            // Insert sample data matching the screenshot
+            String[] insertQueries = {"INSERT INTO products INSERT INTO products (name, category, price, stock) VALUES (?, ?, ?, ?)"};
+           for (String query : insertQueries) {
+                pst = connection.prepareStatement(query);
+                pst.executeUpdate();
+            }
+        }
+    } catch (SQLException e) {
+        System.err.println("Error initializing sample data: " + e.getMessage());
+    } finally {
+        try {
+            if (rs != null) rs.close();
+            if (pst != null) pst.close();
+        } catch (SQLException e) {
+            System.err.println("Error closing resources: " + e.getMessage());
+        }
+    }
+} 
+    // Method to load product data from database
+    private void loadProductData() {
+        loadProductData(""); // Load all products initially
+    }
+    
+    // Method to load product data with search filter
+    private void loadProductData(String searchText) {
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0); // Clear existing data
+        
+        if (connection != null) {
+        try {
+            String query = "SELECT name, category, price, stock FROM products WHERE name LIKE ? OR category LIKE ?";
+            pst = connection.prepareStatement(query);
+            pst.setString(1, "%" + searchText + "%");
+            pst.setString(2, "%" + searchText + "%");
+            
+            rs = pst.executeQuery();
+            
+            while (rs.next()) {
+                String name = rs.getString("name");
+                String category = rs.getString("category");
+                String price = rs.getString("price");
+                String stock = rs.getString("stock");
+                
+                model.addRow(new Object[]{name, category, price, stock});
+            }
+        } catch (SQLException e) {
+            System.err.println("Error loading product data: " + e.getMessage());
+        }finally {
+            try {
+                if (rs != null) rs.close();
+                if (pst != null) pst.close();
+            } catch (SQLException e) {
+                System.err.println("Error closing resources: " + e.getMessage());
+            }
+        }
+    } else {
+        initializeProductData();
+    }
+}
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
+     */
+    @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    private void initComponents() {
+
+        jPanel1 = new javax.swing.JPanel();
+        jPanel2 = new javax.swing.JPanel();
+        jLabeldashboard = new javax.swing.JLabel();
+        jTextFieldSearch = new javax.swing.JTextField();
+        jButtonAddProduct = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTable1 = new javax.swing.JTable();
+        jLabeltitle1 = new javax.swing.JLabel();
+        jLabeltitle2 = new javax.swing.JLabel();
+        jButtonDashboard = new javax.swing.JButton();
+        jButtonProduct = new javax.swing.JButton();
+        jButtonReports = new javax.swing.JButton();
+
+        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Dashboard");
+
+        jPanel1.setBackground(new java.awt.Color(213, 199, 163));
+
+        jPanel2.setBackground(new java.awt.Color(242, 226, 177));
+
+        jLabeldashboard.setFont(new java.awt.Font("Leelawadee UI", 1, 36)); // NOI18N
+        jLabeldashboard.setText("DASHBOARD");
+
+        jTextFieldSearch.setBackground(new java.awt.Color(246, 240, 240));
+        jTextFieldSearch.setText("Search");
+        jTextFieldSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldSearchActionPerformed(evt);
+            }
+        });
+
+        jButtonAddProduct.setBackground(new java.awt.Color(246, 240, 240));
+        jButtonAddProduct.setFont(new java.awt.Font("Leelawadee UI", 1, 14)); // NOI18N
+        jButtonAddProduct.setText("ADD PRODUCT");
+        jButtonAddProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonAddProductActionPerformed(evt);
+            }
+        });
+
+        jTable1.setBackground(new java.awt.Color(246, 240, 240));
+        jTable1.setFont(new java.awt.Font("Leelawadee UI", 0, 14)); // NOI18N
+        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {"Meat", "Perishable Food", "$90", "1000"},
+                {"Lays", "Snacks", "$10", "1000"},
+                {"Coca Cola", "Beverage", "$50", "5000"},
+                {"Colgate", "Hygiene Essential", "$30", "2000"},
+                {"Joy Dishwashing", "Household Essential", "$60", "3000"},
+                {"", null, null, null},
+                {"", null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "NAME", "CATEGORY", "PRICE", "STOCK"
+            }
+        ));
+        jScrollPane1.setViewportView(jTable1);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(169, 169, 169)
+                .addComponent(jLabeldashboard, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(163, 163, 163))
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jScrollPane1)
+                        .addContainerGap())
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jTextFieldSearch)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButtonAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(14, 14, 14))))
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(19, 19, 19)
+                .addComponent(jLabeldashboard)
+                .addGap(29, 29, 29)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldSearch, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonAddProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 35, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+
+        jLabeltitle1.setFont(new java.awt.Font("Leelawadee UI", 1, 24)); // NOI18N
+        jLabeltitle1.setText("CONVENIENCE STORE");
+
+        jLabeltitle2.setBackground(new java.awt.Color(246, 240, 240));
+        jLabeltitle2.setFont(new java.awt.Font("Leelawadee UI", 0, 18)); // NOI18N
+        jLabeltitle2.setText("INVENTORY SYSTEM");
+
+        jButtonDashboard.setBackground(new java.awt.Color(246, 240, 240));
+        jButtonDashboard.setFont(new java.awt.Font("Leelawadee UI", 1, 18)); // NOI18N
+        jButtonDashboard.setText("DASHBOARD");
+        jButtonDashboard.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDashboardActionPerformed(evt);
+            }
+        });
+
+        jButtonProduct.setBackground(new java.awt.Color(246, 240, 240));
+        jButtonProduct.setFont(new java.awt.Font("Leelawadee UI", 1, 18)); // NOI18N
+        jButtonProduct.setText("PRODUCT");
+        jButtonProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonProductActionPerformed(evt);
+            }
+        });
+
+        jButtonReports.setBackground(new java.awt.Color(246, 240, 240));
+        jButtonReports.setFont(new java.awt.Font("Leelawadee UI", 1, 18)); // NOI18N
+        jButtonReports.setText("REPORTS");
+        jButtonReports.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonReportsActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabeltitle1, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(39, 39, 39)
+                                .addComponent(jLabeltitle2))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addGap(51, 51, 51)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(jButtonReports, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jButtonDashboard, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jButtonProduct, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(24, 24, 24)
+                .addComponent(jLabeltitle1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabeltitle2)
+                .addGap(58, 58, 58)
+                .addComponent(jButtonDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(29, 29, 29)
+                .addComponent(jButtonProduct, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(33, 33, 33)
+                .addComponent(jButtonReports, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(113, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        getContentPane().setLayout(layout);
+        layout.setHorizontalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        layout.setVerticalGroup(
+            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+
+        pack();
+    }// </editor-fold>//GEN-END:initComponents
+
+    private void jTextFieldSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldSearchActionPerformed
+        // TODO add your handling code here:
+        loadProductData(jTextFieldSearch.getText());
+    }//GEN-LAST:event_jTextFieldSearchActionPerformed
+
+    private void jButtonDashboardActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDashboardActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+        new dashboard().setVisible(true);
+    }//GEN-LAST:event_jButtonDashboardActionPerformed
+
+    private void jButtonProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonProductActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+        new product().setVisible(true);
+    }//GEN-LAST:event_jButtonProductActionPerformed
+
+    private void jButtonReportsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonReportsActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+        new reports().setVisible(true);
+    }//GEN-LAST:event_jButtonReportsActionPerformed
+
+    private void jButtonAddProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonAddProductActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+        new add_product().setVisible(true);
+    }//GEN-LAST:event_jButtonAddProductActionPerformed
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        /* Set the Nimbus look and feel */
+        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
+         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
+         */
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        //</editor-fold>
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException ex) {
+            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (InstantiationException ex) {
+            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(dashboard.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
+        /* Create and display the form */
+        java.awt.EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                new dashboard().setVisible(true);
+            }
+        });
+    }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButtonAddProduct;
+    private javax.swing.JButton jButtonDashboard;
+    private javax.swing.JButton jButtonProduct;
+    private javax.swing.JButton jButtonReports;
+    private javax.swing.JLabel jLabeldashboard;
+    private javax.swing.JLabel jLabeltitle1;
+    private javax.swing.JLabel jLabeltitle2;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable jTable1;
+    private javax.swing.JTextField jTextFieldSearch;
+    // End of variables declaration//GEN-END:variables
+}
